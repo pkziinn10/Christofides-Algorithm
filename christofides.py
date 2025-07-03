@@ -91,7 +91,7 @@ def christofides(g, n):
     cost = compute_cost(ham, g)
     return ham, cost
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Uso: python christofides.py <graph.txt>")
         sys.exit(1)

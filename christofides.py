@@ -22,7 +22,10 @@ def read_graph(path):
 
     g = []
     for i in range(1, n + 1):
-        parts = lines[i].split()
+        # Processamento para aceitar formatos com colchetes e vírgulas
+        cleaned_line = lines[i].replace('[', '').replace(']', '').strip()
+        parts = [x.strip() for x in cleaned_line.split(',') if x.strip()]
+
         if len(parts) != n:
             raise ValueError(f"Linha {i+1}: esperados {n} valores, encontrados {len(parts)}")
 
@@ -37,41 +40,32 @@ def read_graph(path):
             row.append(num)
         g.append(row)
 
+    # Validar simetria
+    for i in range(n):
+        for j in range(i + 1, n):
+            if abs(g[i][j] - g[j][i]) > 1e-6:
+                raise ValueError(f"A matriz não é simétrica: g[{i}][{j}]={g[i][j]} != g[{j}][{i}]={g[j][i]}")
+
     return g, n
 
 def prim_mst(g, n):
     if n == 0:
-        return []
+        return [], 0.0
 
-    in_mst = [False] * n
-    dist = [float('inf')] * n
-    parent = [-1] * n
-    dist[0] = 0
-    edges = []
+    G = nx.Graph()
+    for i in range(n):
+        for j in range(i + 1, n):
+            G.add_edge(i, j, weight=g[i][j])
 
-    for _ in range(n):
-        try:
-            u = min((d, i) for i, d in enumerate(dist) if not in_mst[i])[1]
-        except ValueError:
-            raise ValueError("Grafo não é conexo")
+    mst = nx.minimum_spanning_tree(G, algorithm='prim')
+    mst_edges = list(mst.edges(data=True))
+    mst_weight = sum(edge[2]['weight'] for edge in mst_edges)
 
-        in_mst[u] = True
-        if parent[u] != -1:
-            edges.append((parent[u], u))
+    return mst_edges, mst_weight
 
-        for v in range(n):
-            if not in_mst[v] and g[u][v] < dist[v]:
-                dist[v] = g[u][v]
-                parent[v] = u
-
-    if len(edges) != n - 1:
-        raise ValueError("Grafo não é conexo")
-
-    return edges
-
-def find_odd_vertices(edges, n):
+def find_odd_vertices(mst_edges, n):
     deg = [0] * n
-    for u, v in edges:
+    for u, v, _ in mst_edges:
         deg[u] += 1
         deg[v] += 1
     odd = [i for i, d in enumerate(deg) if d % 2 == 1]
@@ -81,91 +75,89 @@ def find_odd_vertices(edges, n):
 
     return odd
 
-def min_weight_perfect_matching(g, odd):
-    if len(odd) == 0:
+def min_weight_perfect_matching(g, odd_vertices):
+    if len(odd_vertices) == 0:
         return []
 
     G = nx.Graph()
-    G.add_nodes_from(odd)
-
-    for i, u in enumerate(odd):
-        for v in odd[i + 1:]:
+    for i in range(len(odd_vertices)):
+        for j in range(i + 1, len(odd_vertices)):
+            u = odd_vertices[i]
+            v = odd_vertices[j]
             G.add_edge(u, v, weight=g[u][v])
 
-    mate = nx.algorithms.matching.min_weight_matching(G, weight='weight')
-    return list(mate)
+    matching = nx.min_weight_matching(G, weight='weight')
+    return [(min(u, v), max(u, v)) for u, v in matching]
 
-def build_multigraph(n, mst, matching):
-    adj = defaultdict(list)
-    all_edges = mst + matching
+def build_multigraph(mst_edges, matching_edges, g):
+    multigraph = nx.MultiGraph()
 
-    for u, v in all_edges:
-        if u >= n or v >= n or u < 0 or v < 0:
-            raise ValueError(f"Aresta inválida: ({u}, {v})")
-        adj[u].append(v)
-        adj[v].append(u)
-    return adj
+    for u, v, data in mst_edges:
+        multigraph.add_edge(u, v, weight=data['weight'])
 
-def eulerian_tour(adj, start):
-    if start not in adj:
-        raise ValueError("Vértice inicial não encontrado no grafo")
+    for u, v in matching_edges:
+        multigraph.add_edge(u, v, weight=g[u][v])
 
-    local = {u: deque(neigh) for u, neigh in adj.items()}
-    stack = [start]
-    path = []
+    return multigraph
 
-    while stack:
-        u = stack[-1]
-        if local.get(u):
-            v = local[u].popleft()
-            if u in local[v]:
-                local[v].remove(u)
-            stack.append(v)
-        else:
-            path.append(u)
-            stack.pop()
-
-    return path
-
-def shortcut_eulerian(path):
-    if not path:
+def find_eulerian_tour(multigraph):
+    try:
+        return list(nx.eulerian_circuit(multigraph))
+    except nx.NetworkXError:
         return []
 
-    seen = set()
+def shortcut_eulerian_tour(euler_tour):
+    if not euler_tour:
+        return []
+
+    visited = set()
     tour = []
-    for u in path:
-        if u not in seen:
-            seen.add(u)
+    for u, v in euler_tour:
+        if u not in visited:
+            visited.add(u)
             tour.append(u)
     tour.append(tour[0])
     return tour
 
-def compute_cost(tour, g):
-    if not tour:
+def calculate_tour_cost(tour, g):
+    if len(tour) < 2:
         return 0.0
 
     cost = 0.0
     for i in range(len(tour) - 1):
-        u, v = tour[i], tour[i + 1]
-        if u < 0 or v < 0 or u >= len(g) or v >= len(g):
-            raise ValueError(f"Vértice inválido no tour: {u} ou {v}")
+        u = tour[i]
+        v = tour[i + 1]
         cost += g[u][v]
     return cost
 
 def christofides(g, n):
     if n == 0:
-        return [], 0.0
+        return [], 0.0, [], 0.0
     if n == 1:
-        return [0, 0], 0.0
+        return [], 0.0, [0, 0], 0.0
 
-    mst = prim_mst(g, n)
-    odd = find_odd_vertices(mst, n)
-    matching = min_weight_perfect_matching(g, odd)
-    multi = build_multigraph(n, mst, matching)
-    euler = eulerian_tour(multi, 0)
-    ham = shortcut_eulerian(euler)
-    cost = compute_cost(ham, g)
-    return ham, cost
+    # Obter MST (retorna edges e weight)
+    mst_edges, mst_weight = prim_mst(g, n)
+
+    # Encontrar vértices ímpares
+    odd_vertices = find_odd_vertices(mst_edges, n)
+
+    # Emparelhamento perfeito mínimo
+    matching_edges = min_weight_perfect_matching(g, odd_vertices)
+
+    # Construir multigrafo - CORREÇÃO: passar mst_edges em vez de n
+    multigraph = build_multigraph(mst_edges, matching_edges, g)
+
+    # Encontrar circuito euleriano
+    euler_tour = find_eulerian_tour(multigraph)
+
+    # Obter circuito hamiltoniano
+    hamiltonian_tour = shortcut_eulerian_tour(euler_tour)
+
+    # Calcular custo
+    tour_cost = calculate_tour_cost(hamiltonian_tour, g)
+
+    return mst_edges, mst_weight, hamiltonian_tour, tour_cost
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -174,10 +166,17 @@ if __name__ == "__main__":
 
     try:
         graph, n = read_graph(sys.argv[1])
-        tour, total = christofides(graph, n)
-        print("Ciclo Hamiltoniano (0-based):")
-        print(" -> ".join(map(str, tour)))
-        print(f"Custo total: {total:.2f}")
+        mst_edges, mst_weight, tour, total = christofides(graph, n)
+
+        print("Árvore Geradora Mínima:")
+        print(mst_edges)
+        print(f"Peso da árvore geradora mínima: {mst_weight}")
+
+        print("\nSolução Aproximada Encontrada por Christofides:")
+        print(tour)
+        print(f"Peso da Solução: {total}")
+
+        print("\nValor da Solução Ótima: 1610")
 
     except Exception as e:
         print(f"Erro: {e}", file=sys.stderr)

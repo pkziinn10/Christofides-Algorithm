@@ -1,6 +1,7 @@
 import sys
 import heapq
 import networkx as nx
+from collections import defaultdict
 
 def read_graph(path):
     with open(path) as f:
@@ -71,7 +72,6 @@ def prim_mst(g, n):
         total_weight += weight
 
         if parent[u] != -1:
-            # Mantemos o formato (u, v, {'weight': w})
             mst_edges.append((parent[u], u, {'weight': weight}))
 
         for v in range(n):
@@ -108,62 +108,79 @@ def min_weight_perfect_matching(g, odd_vertices):
         for j in range(i + 1, len(odd_vertices)):
             u = odd_vertices[i]
             v = odd_vertices[j]
-            G.add_edge(u, v, weight=g[u][v])
+            # Peso negativo para obter mínimo matching
+            G.add_edge(u, v, weight=-g[u][v])
 
-    matching = nx.min_weight_matching(G, weight='weight')
-    return [(min(u, v), max(u, v)) for u, v in matching]
+    matching = nx.max_weight_matching(
+        G, maxcardinality=True, weight='weight'
+    )
+    return [(u, v) for u, v in matching]
 
 def build_multigraph(mst_edges, matching_edges, n):
-    adj = [[] for _ in range(n)]
+    # Lista de todas as arestas do multigrafo
+    all_edges = []
 
+    # Adiciona arestas da MST (1 cópia de cada)
     for edge in mst_edges:
-        u = edge[0]
-        v = edge[1]
-        adj[u].append(v)
-        adj[v].append(u)
+        u, v, _ = edge
+        all_edges.append((min(u, v), max(u, v)))
 
+    # Adiciona arestas do emparelhamento (1 cópia de cada)
     for u, v in matching_edges:
-        adj[u].append(v)
-        adj[v].append(u)
+        all_edges.append((min(u, v), max(u, v)))
 
-    return adj
+    return all_edges
 
-def find_eulerian_tour(multigraph_adj):
-    adj = [list(lst) for lst in multigraph_adj]
-    n = len(adj)
+def find_eulerian_tour(edges, n):
+    # Construir lista de adjacência com contagem de arestas
+    graph = defaultdict(list)
+    edge_count = defaultdict(int)
 
-    start_vertex = None
-    for i in range(n):
-        if adj[i]:
-            start_vertex = i
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+        edge_count[(min(u, v), max(u, v))] += 1
+
+    # Encontrar vértice de partida (qualquer vértice com arestas)
+    start = next(iter(graph.keys()), None)
+    for node in graph:
+        if graph[node]:
+            start = node
             break
 
-    if start_vertex is None:
-        return []
-
-    stack = [start_vertex]
-    circuit = []
+    # Algoritmo de Hierholzer com contagem de arestas
+    stack = [start]
+    tour = []
 
     while stack:
         u = stack[-1]
-        if adj[u]:
-            v = adj[u][0]
-            # Remove a aresta (u, v)
-            adj[u].remove(v)
-            adj[v].remove(u)
-            stack.append(v)
+
+        if graph[u]:
+            v = graph[u].pop()
+
+            # Verifica se a aresta ainda existe
+            edge_key = (min(u, v), max(u, v))
+            if edge_count[edge_key] > 0:
+                # Remove a aresta do grafo
+                edge_count[edge_key] -= 1
+                # Remove a ocorrência inversa
+                graph[v].remove(u)
+                stack.append(v)
+            else:
+                # Aresta já foi removida, tenta próximo vizinho
+                continue
         else:
-            circuit.append(stack.pop())
+            tour.append(stack.pop())
 
-    return circuit[::-1]
+    return tour[::-1]
 
-def shortcut_eulerian_vertices(euler_vertices):
-    if not euler_vertices:
+def shortcut_eulerian_vertices(euler_tour):
+    if not euler_tour:
         return []
 
     visited = set()
     tour = []
-    for v in euler_vertices:
+    for v in euler_tour:
         if v not in visited:
             visited.add(v)
             tour.append(v)
@@ -188,12 +205,25 @@ def christofides(g, n):
     if n == 1:
         return [], 0.0, [0, 0], 0.0
 
+    # Etapa 1: Árvore Geradora Mínima
     mst_edges, mst_weight = prim_mst(g, n)
+
+    # Etapa 2: Encontrar vértices de grau ímpar
     odd_vertices = find_odd_vertices(mst_edges, n)
+
+    # Etapa 3: Emparelhamento Perfeito Mínimo
     matching_edges = min_weight_perfect_matching(g, odd_vertices)
-    multigraph_adj = build_multigraph(mst_edges, matching_edges, n)
-    euler_vertices = find_eulerian_tour(multigraph_adj)
-    hamiltonian_tour = shortcut_eulerian_vertices(euler_vertices)
+
+    # Etapa 4: Construir multigrafo
+    multigraph_edges = build_multigraph(mst_edges, matching_edges, n)
+
+    # Etapa 5: Encontrar circuito euleriano
+    euler_tour = find_eulerian_tour(multigraph_edges, n)
+
+    # Etapa 6: Atalho para ciclo hamiltoniano
+    hamiltonian_tour = shortcut_eulerian_vertices(euler_tour)
+
+    # Etapa 7: Calcular custo do ciclo
     tour_cost = calculate_tour_cost(hamiltonian_tour, g)
 
     return mst_edges, mst_weight, hamiltonian_tour, tour_cost
@@ -216,8 +246,6 @@ if __name__ == "__main__":
         print(tour)
         print(f"Peso da Solução: {total}")
 
-        # Adiciona linha com solução ótima (valor fixo conforme exemplo)
-        print("\nValor da Solução Ótima: 1610")
 
     except Exception as e:
         print(f"Erro: {e}", file=sys.stderr)

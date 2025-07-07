@@ -1,100 +1,77 @@
-Christofides Algorithm 🚀
+🛣️ Algoritmo de Christofides para TSP
+Este projeto implementa o Algoritmo de Christofides para resolver o Problema do Caixeiro Viajante (TSP) em grafos métricos, garantindo uma aproximação de até 3/2 (150%) do ótimo, utilizando Python e bibliotecas de grafos.
 
-Implementação em Python para resolver o Problema do Caixeiro Viajante (TSP) utilizando o Algoritmo de Christofides.
+📁 Estrutura
+christofides.py: Implementação completa do algoritmo.
 
+main.py: Script para executar o algoritmo com exemplos.
 
-🧠 Visão Geral:
+utils.py: Funções de leitura de grafos e visualização.
 
-O algoritmo executa os seguintes passos:
+graphs/: Exemplos de grafos de entrada.
 
-Construir uma Árvore Geradora Mínima (MST).
+outputs/: Resultados e visualizações geradas.
 
-Encontrar os vértices de grau ímpar na MST.
+🧪 Tecnologias Utilizadas
+Python
 
-Gerar um emparelhamento perfeito de peso mínimo entre os vértices ímpares.
+NetworkX
 
-Combinar MST + matching, formando um grafo Euleriano.
+Matplotlib
 
-Encontrar um circuito de Euler.
+Jupyter Notebook (opcional para análises)
 
-Converter em circuito Hamiltoniano (removendo repetições).
-
-
-⚙️ Pré-requisitos:
-
-Python 3.7+
-
-networkx
-
-matplotlib (opcional, para visualização)
-
-
-Instalação:
-
-bash
-Copiar
-Editar
-pip install networkx matplotlib
-
-
-🛠️ Como Executar:
+🚀 Como executar
+Clone este repositório:
 
 bash
 Copiar
 Editar
 git clone https://github.com/seuusuario/Christofides-Algorithm.git
-cd Christofides-Algorithm
-python main.py --input caminho/para/grafo.txt --debug true
-Parâmetros:
-
---input: caminho do arquivo de entrada (grafo)
-
---debug: true para visualizar passos intermediários
-
-
-📂 Estrutura do Projeto:
+Navegue até a pasta:
 
 bash
 Copiar
 Editar
-.
-├── main.py             # Script principal
-├── christofides.py     # Algoritmo de Christofides
-├── utils.py            # Funções utilitárias
-├── graphs/             # Exemplos de grafos
-└── outputs/            # Saídas e gráficos gerados
+cd Christofides-Algorithm
+Instale as dependências:
 
-
-📊 Exemplo de Uso:
+bash
+Copiar
+Editar
+pip install networkx matplotlib
+Execute o algoritmo em um grafo de exemplo:
 
 bash
 Copiar
 Editar
 python main.py --input graphs/exemplo.txt --debug true
-Gera:
+Ou abra um notebook para visualização passo a passo:
 
-MST construída
+bash
+Copiar
+Editar
+jupyter notebook
+📊 Objetivo
+O principal objetivo deste projeto é demonstrar na prática como o Algoritmo de Christofides constrói soluções aproximadas para o TSP, detalhando cada etapa do processo:
 
-Vértices ímpares e matching mínimo
+✅ Construção da MST
+✅ Identificação de vértices de grau ímpar
+✅ Matching de peso mínimo
+✅ Formação do circuito de Euler
+✅ Conversão em circuito Hamiltoniano
 
-Circuito Euleriano e solução final
+📌 Resultados
+Cálculo do custo total do percurso aproximado.
 
-Visualizações opcionais
+Visualização das etapas do algoritmo.
 
+Análise do tempo de execução e escalabilidade.
 
-📝 Contribuição,
-Contribuições são bem-vindas:
+Comparação com outros métodos aproximados ou exatos (em etapas futuras).
 
-Melhorias de performance
-
-Suporte a novos formatos de entrada
-
-Visualizações interativas
-
-Testes automatizados
-
-Abra uma issue ou envie um pull request.
-
+✨ Contribuições
+Sinta-se à vontade para abrir issues ou pull requests com sugestões, correções de bugs ou melhorias no algoritmo! 👩‍💻👨‍💻
 
 📄 Licença
-Distribuído sob a MIT License.
+Este projeto está sob a licença MIT. Consulte o arquivo LICENSE para mais detalhes.

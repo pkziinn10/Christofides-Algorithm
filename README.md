@@ -18,8 +18,6 @@ Python
 
 NetworkX
 
-Matplotlib
-
 ## 🚀 Como executar
 Clone este repositório:
 

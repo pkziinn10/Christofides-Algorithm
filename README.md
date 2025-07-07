@@ -20,39 +20,27 @@ NetworkX
 
 Matplotlib
 
-Jupyter Notebook (opcional para análises)
-
 ## 🚀 Como executar
 Clone este repositório:
 
-bash
-Copiar
-Editar
-git clone https://github.com/seuusuario/Christofides-Algorithm.git
+```bash
+git clone https://github.com/pkziinn10/Christofides-Algorithm
+```
+
 Navegue até a pasta:
-
-bash
-Copiar
-Editar
+```bash
 cd Christofides-Algorithm
-Instale as dependências:
+```
 
-bash
-Copiar
-Editar
+Instale as dependências:
+```python
 pip install networkx matplotlib
+```
 Execute o algoritmo em um grafo de exemplo:
 
-bash
-Copiar
-Editar
+``` bash
 python main.py --input graphs/exemplo.txt --debug true
-Ou abra um notebook para visualização passo a passo:
-
-bash
-Copiar
-Editar
-jupyter notebook
+```
 
 ### 📊 Objetivo
 O principal objetivo deste projeto é demonstrar na prática como o Algoritmo de Christofides constrói soluções aproximadas para o TSP, detalhando cada etapa do processo:

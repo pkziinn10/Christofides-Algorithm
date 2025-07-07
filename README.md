@@ -37,7 +37,7 @@ pip install networkx matplotlib
 Execute o algoritmo em um grafo de exemplo:
 
 ``` bash
-python main.py --input graphs/exemplo.txt --debug true
+python3 christofides.py graph.txt
 ```
 
 ### 📊 Objetivo

@@ -2,7 +2,9 @@ Christofides Algorithm 🚀
 
 Implementação em Python para resolver o Problema do Caixeiro Viajante (TSP) utilizando o Algoritmo de Christofides.
 
-🧠 Visão Geral
+
+🧠 Visão Geral:
+
 O algoritmo executa os seguintes passos:
 
 Construir uma Árvore Geradora Mínima (MST).
@@ -17,12 +19,15 @@ Encontrar um circuito de Euler.
 
 Converter em circuito Hamiltoniano (removendo repetições).
 
-⚙️ Pré-requisitos
+
+⚙️ Pré-requisitos:
+
 Python 3.7+
 
 networkx
 
 matplotlib (opcional, para visualização)
+
 
 Instalação:
 
@@ -31,7 +36,9 @@ Copiar
 Editar
 pip install networkx matplotlib
 
-🛠️ Como Executar
+
+🛠️ Como Executar:
+
 bash
 Copiar
 Editar
@@ -44,7 +51,9 @@ Parâmetros:
 
 --debug: true para visualizar passos intermediários
 
-📂 Estrutura do Projeto
+
+📂 Estrutura do Projeto:
+
 bash
 Copiar
 Editar
@@ -55,7 +64,9 @@ Editar
 ├── graphs/             # Exemplos de grafos
 └── outputs/            # Saídas e gráficos gerados
 
-📊 Exemplo de Uso
+
+📊 Exemplo de Uso:
+
 bash
 Copiar
 Editar
@@ -70,7 +81,8 @@ Circuito Euleriano e solução final
 
 Visualizações opcionais
 
-📝 Contribuição
+
+📝 Contribuição,
 Contribuições são bem-vindas:
 
 Melhorias de performance
@@ -82,6 +94,7 @@ Visualizações interativas
 Testes automatizados
 
 Abra uma issue ou envie um pull request.
+
 
 📄 Licença
 Distribuído sob a MIT License.

@@ -2,15 +2,15 @@
 Este projeto implementa o Algoritmo de Christofides para resolver o Problema do Caixeiro Viajante (TSP) em grafos métricos, garantindo uma aproximação de até 3/2 (150%) do ótimo, utilizando Python e bibliotecas de grafos.
 
 ## 📁 Estrutura:
-christofides.py: Implementação completa do algoritmo.
-graphs.txt
+* christofides.py: Implementação completa do algoritmo.
+
+* graph.txt
 
 ## 🧪 Tecnologias Utilizadas:
-
-Python
-
-NetworkX
-
+* Python
+* NetworkX
+* sys
+* heapq
 ## 🚀 Como executar
 Clone este repositório:
 
@@ -25,7 +25,7 @@ cd Christofides-Algorithm
 
 Instale as dependências:
 ```python
-pip install networkx matplotlib
+pip install networkx
 ```
 Execute o algoritmo em um grafo de exemplo:
 

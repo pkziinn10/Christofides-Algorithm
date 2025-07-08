@@ -3,14 +3,7 @@ Este projeto implementa o Algoritmo de Christofides para resolver o Problema do 
 
 ## 📁 Estrutura:
 christofides.py: Implementação completa do algoritmo.
-
-main.py: Script para executar o algoritmo com exemplos.
-
-utils.py: Funções de leitura de grafos e visualização.
-
-graphs/: Exemplos de grafos de entrada.
-
-outputs/: Resultados e visualizações geradas.
+graphs.txt
 
 ## 🧪 Tecnologias Utilizadas:
 

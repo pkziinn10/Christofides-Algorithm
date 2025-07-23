@@ -4,45 +4,38 @@ import networkx as nx
 from collections import defaultdict
 import time
 
-# Função para ler um grafo a partir de um arquivo
+# Função para ler um grafo a partir de um arquivo.
+# Arquivo deve ter um padrão de: 
+# Na primeira linha: O número de vertices (n)
+# Nas n linhas seguintes: A matriz de adjacência n×n com os pesos das arestas
 def read_graph(path):
-    # Abre o arquivo no caminho especificado
     with open(path) as f:
-        # Lê todas as linhas não vazias, removendo espaços extras
         lines = [line.strip() for line in f if line.strip()]
 
-    # Verifica se o arquivo está vazio
     if not lines:
         raise ValueError("Arquivo vazio")
 
     try:
-        # Lê o número de vértices na primeira linha
         n = int(lines[0])
     except ValueError:
         raise ValueError("Primeira linha deve ser um inteiro (número de vértices)")
 
-    # Valida se o número de vértices é positivo
     if n <= 0:
         raise ValueError("Número de vértices deve ser positivo")
 
-    # Verifica se há linhas suficientes para a matriz
     if len(lines) < n + 1:
         raise ValueError(f"Esperadas {n+1} linhas, mas encontradas {len(lines)}")
 
-    # Inicializa a matriz de adjacência
     g = []
-    # Processa cada linha da matriz
+
     for i in range(1, n + 1):
-        # Remove colchetes e espaços extras
         cleaned_line = lines[i].replace('[', '').replace(']', '').strip()
-        # Divide os elementos por vírgula, ignorando vazios
+
         parts = [x.strip() for x in cleaned_line.split(',') if x.strip()]
 
-        # Valida o número de colunas
         if len(parts) != n:
             raise ValueError(f"Linha {i+1}: esperados {n} valores, encontrados {len(parts)}")
 
-        # Converte cada valor para float e verifica se é não-negativo
         row = []
         for x in parts:
             try:
@@ -54,7 +47,6 @@ def read_graph(path):
             row.append(num)
         g.append(row)
 
-    # Valida a simetria da matriz (grafo não direcionado)
     for i in range(n):
         for j in range(i + 1, n):
             if abs(g[i][j] - g[j][i]) > 1e-6:
@@ -64,11 +56,9 @@ def read_graph(path):
 
 # Algoritmo de Prim para encontrar a Árvore Geradora Mínima (MST)
 def prim_mst(g, n):
-    # Caso especial: grafo vazio
     if n == 0:
         return [], 0.0
 
-    # Estruturas para o algoritmo de Prim
     in_mst = [False] * n
     parent = [-1] * n
     key = [float('inf')] * n
@@ -107,16 +97,17 @@ def prim_mst(g, n):
 # Encontra vértices com grau ímpar na MST
 def find_odd_vertices(mst_edges, n):
     deg = [0] * n  # Inicializa graus dos vértices
-    # Conta as ocorrências de cada vértice nas arestas
+
+    # Contagem dos graus
     for edge in mst_edges:
         u = edge[0]
         v = edge[1]
         deg[u] += 1
         deg[v] += 1
-    # Filtra vértices com grau ímpar
+
+    # Filtra os vertices de grau impar
     odd = [i for i, d in enumerate(deg) if d % 2 == 1]
 
-    # Verifica consistência (deve ser número par)
     if len(odd) % 2 != 0:
         raise RuntimeError("Número ímpar de vértices de grau ímpar detectado")
 
@@ -124,7 +115,6 @@ def find_odd_vertices(mst_edges, n):
 
 # Encontra o emparelhamento perfeito mínimo entre vértices ímpares
 def min_weight_perfect_matching(g, odd_vertices):
-    # Caso sem vértices ímpares
     if len(odd_vertices) == 0:
         return []
 
@@ -141,27 +131,27 @@ def min_weight_perfect_matching(g, odd_vertices):
     matching = nx.max_weight_matching(
         G, maxcardinality=True, weight='weight'
     )
-    # Converte o resultado para lista de arestas
+
     return [(u, v) for u, v in matching]
 
 # Constrói um multigrafo combinando MST e arestas do emparelhamento
 def build_multigraph(mst_edges, matching_edges, n):
     all_edges = []
 
-    # Adiciona todas as arestas da MST (1 cópia)
+    # Adiciona as arestas da MST de forma ordenada
     for edge in mst_edges:
         u, v, _ = edge
         all_edges.append((min(u, v), max(u, v)))
 
-    # Adiciona todas as arestas do emparelhamento (1 cópia)
+    # Adiciona as arestas do emparelhamento perfeito de forma ordenada
     for u, v in matching_edges:
         all_edges.append((min(u, v), max(u, v)))
 
     return all_edges
 
-# Encontra um circuito euleriano no multigrafo
+# Encontra um circuito euleriano no multigrafo usando Hierholzer 
 def find_eulerian_tour(edges, n):
-    # Cria lista de adjacência e contador de arestas
+
     graph = defaultdict(list)
     edge_count = defaultdict(int)
 
@@ -172,7 +162,7 @@ def find_eulerian_tour(edges, n):
         # Usa tupla ordenada para identificar a aresta
         edge_count[(min(u, v), max(u, v))] += 1
 
-    # Encontra um vértice inicial não isolado
+    # Encontra um vértice inicial não 
     start = next(iter(graph.keys()), None)
     for node in graph:
         if graph[node]:
@@ -181,29 +171,22 @@ def find_eulerian_tour(edges, n):
 
     # Algoritmo de Hierholzer para circuito euleriano
     stack = [start]
-    tour = []  # Armazenará o tour final
+    tour = []
 
     while stack:
-        u = stack[-1]  # Pega o topo da pilha
+        u = stack[-1]  
 
-        # Se ainda há arestas saindo de u
         if graph[u]:
-            v = graph[u].pop()  # Pega um vizinho
+            v = graph[u].pop()
 
-            # Verifica se a aresta (u,v) ainda existe
             edge_key = (min(u, v), max(u, v))
             if edge_count[edge_key] > 0:
-                # Remove uma ocorrência da aresta
                 edge_count[edge_key] -= 1
-                # Remove a aresta inversa da lista de adjacência
                 graph[v].remove(u)
-                # Empilha o próximo vértice
                 stack.append(v)
             else:
-                # Aresta já foi usada, tenta próximo vizinho
                 continue
         else:
-            # Adiciona vértice ao tour quando não tem mais arestas
             tour.append(stack.pop())
 
     # Inverte para obter a ordem correta
@@ -214,8 +197,8 @@ def shortcut_eulerian_vertices(euler_tour):
     if not euler_tour:
         return []
 
-    visited = set()  # Controla vértices já visitados
-    tour = []        # Tour resultante sem repetições
+    visited = set()  
+    tour = []
 
     # Percorre o circuito euleriano, removendo vértices repetidos
     for v in euler_tour:
@@ -233,7 +216,7 @@ def calculate_tour_cost(tour, g):
         return 0.0
 
     cost = 0.0
-    # Soma os pesos entre vértices consecutivos
+
     for i in range(len(tour) - 1):
         u = tour[i]
         v = tour[i + 1]
@@ -242,44 +225,35 @@ def calculate_tour_cost(tour, g):
 
 # Algoritmo de Christofides para TSP
 def christofides(g, n):
-    # Casos especiais para grafos pequenos
     if n <= 1:
         return [], 0.0, [], 0.0
 
     tempos = {}
 
-    # Etapa 1: Calcula a MST
     inicio = time.time()
     mst_edges, mst_weight = prim_mst(g, n)
     tempos['MST'] = time.time() - inicio
 
-    # Etapa 2: Identifica vértices de grau ímpar na MST
     inicio = time.time()
     odd_vertices = find_odd_vertices(mst_edges, n)
     tempos['Vértices Ímpares'] = time.time() - inicio
 
-    # Etapa 3: Encontra emparelhamento perfeito mínimo
     inicio = time.time()
     matching_edges = min_weight_perfect_matching(g, odd_vertices)
     tempos['Emparelhamento'] = time.time() - inicio
 
-
-    # Etapa 4: Combina MST e emparelhamento num multigrafo
     inicio = time.time()
     multigraph_edges = build_multigraph(mst_edges, matching_edges, n)
     tempos['Multigrafo'] = time.time() - inicio
 
-    # Etapa 5: Encontra circuito euleriano no multigrafo
     inicio = time.time()
     euler_tour = find_eulerian_tour(multigraph_edges, n)
     tempos['Circuito Euleriano'] = time.time() - inicio
 
-    # Etapa 6: Remove vértices repetidos (atalho)
     inicio = time.time()
     hamiltonian_tour = shortcut_eulerian_vertices(euler_tour)
     tempos['Atalhos'] = time.time() - inicio
 
-    # Etapa 7: Calcula o custo do ciclo
     inicio = time.time()
     tour_cost = calculate_tour_cost(hamiltonian_tour, g)
     tempos['Cálculo Custo'] = time.time() - inicio
@@ -288,26 +262,21 @@ def christofides(g, n):
 
 # Ponto de entrada do programa
 if __name__ == "__main__":
-    # Verifica argumentos da linha de comando
     if len(sys.argv) != 2:
         print("Uso: python christofides.py <graph.txt>")
         sys.exit(1)
 
     try:
-        # Medição do tempo total (inclui leitura do arquivo)
         inicio_total = time.time()
 
-        # Leitura do grafo
         inicio_leitura = time.time()
         graph, n = read_graph(sys.argv[1])
         tempo_leitura = time.time() - inicio_leitura
 
-        # Execução do algoritmo
         inicio_algoritmo = time.time()
         mst_edges, mst_weight, tour, total, tempos_etapas = christofides(graph, n)
         tempo_algoritmo = time.time() - inicio_algoritmo
 
-        # Tempo total da execução
         tempo_total = time.time() - inicio_total
 
         # Saída formatada
@@ -320,7 +289,7 @@ if __name__ == "__main__":
         print(f"Peso da Solução: {total}")
 
 
-                # Relatório de tempos
+        # Relatório de tempos
         print("\nTempos de Execução:")
         print(f"- Leitura do arquivo: {tempo_leitura:.6f} segundos")
         for etapa, t in tempos_etapas.items():

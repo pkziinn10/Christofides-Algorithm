@@ -1,10 +1,6 @@
-# Importa o módulo sys para manipulação de argumentos da linha de comando
 import sys
-# Importa o módulo heapq para implementação de fila de prioridade (min-heap)
 import heapq
-# Importa o módulo networkx para operações com grafos (emparelhamento perfeito)
 import networkx as nx
-# Importa defaultdict para dicionários com valores padrão
 from collections import defaultdict
 
 # Função para ler um grafo a partir de um arquivo

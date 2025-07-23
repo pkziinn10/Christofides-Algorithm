@@ -2,6 +2,7 @@ import sys
 import heapq
 import networkx as nx
 from collections import defaultdict
+import time
 
 # Função para ler um grafo a partir de um arquivo
 def read_graph(path):
@@ -68,18 +69,17 @@ def prim_mst(g, n):
         return [], 0.0
 
     # Estruturas para o algoritmo de Prim
-    in_mst = [False] * n  # Controla quais vértices já estão na MST
-    parent = [-1] * n      # Armazena o pai de cada vértice na MST
-    key = [float('inf')] * n  # Chaves (pesos) mínimos para conectar vértices
-    key[0] = 0                # Inicia com o vértice 0
-    heap = [(0, 0)]           # Heap inicia com o vértice 0 e peso 0
+    in_mst = [False] * n
+    parent = [-1] * n
+    key = [float('inf')] * n
+    key[0] = 0
+    heap = [(0, 0)]
 
-    mst_edges = []       # Lista de arestas da MST
-    total_weight = 0.0   # Peso total da MST
+    mst_edges = []
+    total_weight = 0.0
 
     # Processa enquanto houver vértices no heap
     while heap:
-        # Extrai o vértice com menor chave
         weight, u = heapq.heappop(heap)
 
         # Ignora se já estiver na MST
@@ -87,19 +87,16 @@ def prim_mst(g, n):
             continue
 
         in_mst[u] = True
-        total_weight += weight  # Adiciona o peso da aresta escolhida
+        total_weight += weight
 
         # Adiciona aresta à MST (exceto para o vértice raiz)
         if parent[u] != -1:
             mst_edges.append((parent[u], u, {'weight': weight}))
 
-        # Atualiza os vizinhos do vértice u
         for v in range(n):
-            # Ignora laços e vértices já na MST
             if u == v or in_mst[v]:
                 continue
 
-            # Se encontrou um peso menor para conectar v
             if g[u][v] < key[v]:
                 parent[v] = u
                 key[v] = g[u][v]
@@ -249,28 +246,45 @@ def christofides(g, n):
     if n <= 1:
         return [], 0.0, [], 0.0
 
+    tempos = {}
+
     # Etapa 1: Calcula a MST
+    inicio = time.time()
     mst_edges, mst_weight = prim_mst(g, n)
+    tempos['MST'] = time.time() - inicio
 
     # Etapa 2: Identifica vértices de grau ímpar na MST
+    inicio = time.time()
     odd_vertices = find_odd_vertices(mst_edges, n)
+    tempos['Vértices Ímpares'] = time.time() - inicio
 
     # Etapa 3: Encontra emparelhamento perfeito mínimo
+    inicio = time.time()
     matching_edges = min_weight_perfect_matching(g, odd_vertices)
+    tempos['Emparelhamento'] = time.time() - inicio
+
 
     # Etapa 4: Combina MST e emparelhamento num multigrafo
+    inicio = time.time()
     multigraph_edges = build_multigraph(mst_edges, matching_edges, n)
+    tempos['Multigrafo'] = time.time() - inicio
 
     # Etapa 5: Encontra circuito euleriano no multigrafo
+    inicio = time.time()
     euler_tour = find_eulerian_tour(multigraph_edges, n)
+    tempos['Circuito Euleriano'] = time.time() - inicio
 
     # Etapa 6: Remove vértices repetidos (atalho)
+    inicio = time.time()
     hamiltonian_tour = shortcut_eulerian_vertices(euler_tour)
+    tempos['Atalhos'] = time.time() - inicio
 
     # Etapa 7: Calcula o custo do ciclo
+    inicio = time.time()
     tour_cost = calculate_tour_cost(hamiltonian_tour, g)
+    tempos['Cálculo Custo'] = time.time() - inicio
 
-    return mst_edges, mst_weight, hamiltonian_tour, tour_cost
+    return mst_edges, mst_weight, hamiltonian_tour, tour_cost, tempos
 
 # Ponto de entrada do programa
 if __name__ == "__main__":
@@ -280,10 +294,21 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        # Lê o grafo do arquivo
+        # Medição do tempo total (inclui leitura do arquivo)
+        inicio_total = time.time()
+
+        # Leitura do grafo
+        inicio_leitura = time.time()
         graph, n = read_graph(sys.argv[1])
-        # Executa o algoritmo de Christofides
-        mst_edges, mst_weight, tour, total = christofides(graph, n)
+        tempo_leitura = time.time() - inicio_leitura
+
+        # Execução do algoritmo
+        inicio_algoritmo = time.time()
+        mst_edges, mst_weight, tour, total, tempos_etapas = christofides(graph, n)
+        tempo_algoritmo = time.time() - inicio_algoritmo
+
+        # Tempo total da execução
+        tempo_total = time.time() - inicio_total
 
         # Saída formatada
         print("Árvore Geradora Mínima:")
@@ -293,6 +318,15 @@ if __name__ == "__main__":
         print("\nSolução Aproximada Encontrada por Christofides:")
         print(tour)
         print(f"Peso da Solução: {total}")
+
+
+                # Relatório de tempos
+        print("\nTempos de Execução:")
+        print(f"- Leitura do arquivo: {tempo_leitura:.6f} segundos")
+        for etapa, t in tempos_etapas.items():
+            print(f"- {etapa}: {t:.6f} segundos")
+        print(f"- Algoritmo Christofides: {tempo_algoritmo:.6f} segundos")
+        print(f"- Tempo total (com leitura): {tempo_total:.6f} segundos")
 
     except Exception as e:
         print(f"Erro: {e}", file=sys.stderr)

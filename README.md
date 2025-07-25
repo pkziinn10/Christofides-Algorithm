@@ -11,17 +11,17 @@ Este projeto implementa uma solução aproximada para o Problema do Caixeiro Via
 ( Windows )
 ### 1. Criar venv
 **- Passo 1**:Abra o Prompt de Comando (CMD) ou PowerShell
-          Navegue até a pasta do seu projeto:
-          cd caminho\para\seu\projeto
+Navegue até a pasta do seu projeto:
+cd caminho\para\seu\projeto
 
 **- Passo 2**:Crie o ambiente virtual:
-          python -m venv nome_do_ambiente
+python -m venv nome_do_ambiente
 
 **- Passo 3**:Ative o ambiente virtual:
-          nome_do_ambiente\Scripts\activate
+nome_do_ambiente\Scripts\activate
 
-          Se estiver no PowerShell:
-          .\nome_do_ambiente\Scripts\Activate.ps1
+Se estiver no PowerShell:
+.\nome_do_ambiente\Scripts\Activate.ps1
 
 ### 1. Gerar a Matriz de Adjacência
 

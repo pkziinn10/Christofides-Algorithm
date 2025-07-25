@@ -20,10 +20,10 @@ cd caminho\para\seu\projeto
 **Passo 2:** Crie o ambiente virtual com o comando:
 
 ```bash
-python -m venv venv
+python -m venv nome_venv
 ```
 
-> Você pode substituir `venv` por outro nome, se preferir.
+> Você pode substituir `nome_venv` por outro nome, se preferir.
 
 **Passo 3:** Ative o ambiente virtual:
 

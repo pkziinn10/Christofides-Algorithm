@@ -98,10 +98,14 @@ O programa imprime:
 ## 🛠️ Requisitos
 
 - Python 3
-- Bibliotecas:
-  - `networkx`
+- Bibliotecas padrão:
+  - `time`
   - `math`
   - `heapq`
+  - `collections.defaultdict`
+  
+- Biblioteca externa:
+  - `networkx`
 
 Instale com:
 

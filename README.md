@@ -9,20 +9,35 @@ Este projeto implementa uma solução aproximada para o Problema do Caixeiro Via
 
 ## ▶️ Como Usar
 ( Windows )
-### 1. Criar venv
-**- Passo 1:**Abra o Prompt de Comando (CMD) ou PowerShell
-          Navegue até a pasta do seu projeto:
-          cd caminho\para\seu\projeto
+### 1. Criar Ambiente Virtual (venv)
 
-**- Passo 2:**Crie o ambiente virtual:
-          python -m venv nome_do_ambiente
+**Passo 1:** Abra o Prompt de Comando (CMD) ou PowerShell e navegue até a pasta do projeto:
 
-**- Passo 3:**Ative o ambiente virtual:
-          nome_do_ambiente\Scripts\activate
+```bash
+cd caminho\para\seu\projeto
+```
 
-          Se estiver no PowerShell:
-          .\nome_do_ambiente\Scripts\Activate.ps1
+**Passo 2:** Crie o ambiente virtual com o comando:
 
+```bash
+python -m venv venv
+```
+
+> Você pode substituir `venv` por outro nome, se preferir.
+
+**Passo 3:** Ative o ambiente virtual:
+
+- No CMD:
+
+```bash
+venv\Scripts\activate
+```
+
+- No PowerShell:
+
+```bash
+.\venv\Scripts\Activate.ps1
+```
 ### 1. Gerar a Matriz de Adjacência
 
 Utilize `instancia.py` para transformar uma instância TSPLIB (`.txt`) em uma matriz de distâncias:

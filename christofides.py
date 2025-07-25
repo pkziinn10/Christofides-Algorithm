@@ -149,7 +149,7 @@ def build_multigraph(mst_edges, matching_edges, n):
 
     return all_edges
 
-# Encontra um circuito euleriano no multigrafo usando Hierholzer 
+# Encontra um circuito euleriano no multigrafo nao-direcionado usando Hierholzer 
 def find_eulerian_tour(edges, n):
 
     graph = defaultdict(list)
@@ -162,7 +162,7 @@ def find_eulerian_tour(edges, n):
         # Usa tupla ordenada para identificar a aresta
         edge_count[(min(u, v), max(u, v))] += 1
 
-    # Encontra um vértice inicial não 
+    # Encontra um vértice inicial não isolado
     start = next(iter(graph.keys()), None)
     for node in graph:
         if graph[node]:
@@ -170,19 +170,26 @@ def find_eulerian_tour(edges, n):
             break
 
     # Algoritmo de Hierholzer para circuito euleriano
+    # Pilha mantem o caminho atual sendo explorado
     stack = [start]
     tour = []
 
     while stack:
         u = stack[-1]  
-
+        
+        # Se tiver arestas saindo de u
         if graph[u]:
+            # Pega uma aresta qualquer
             v = graph[u].pop()
 
             edge_key = (min(u, v), max(u, v))
-            if edge_count[edge_key] > 0:
+            
+            if edge_count[edge_key] > 0: # Se aresta existir
+                # Marca a aresta 
                 edge_count[edge_key] -= 1
+                # Remove uma aresta paralela
                 graph[v].remove(u)
+
                 stack.append(v)
             else:
                 continue
